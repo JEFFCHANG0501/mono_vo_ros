@@ -1,0 +1,10 @@
+<launch>
+  <arg name="path" default="/mnt/d/mono_vo/data/dataset/" />
+  <arg name="bag_name" default="kitti_data_odometry_gray_sequence_00.bag" />
+
+  <node name="mono_vo_node" pkg="mono_vo_ros" type="mono_vo_ros" output="screen" />
+
+  <node pkg="rosbag" type="play" name="player" output="screen" args="$(arg path)$(arg bag_name)" />
+
+  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find mono_vo_ros)/rviz/config.rviz" />
+</launch>
