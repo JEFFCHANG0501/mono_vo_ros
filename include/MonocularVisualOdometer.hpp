@@ -76,7 +76,7 @@ namespace mvo
   const double OFFSET_PITCH  = -1.0 * M_PI / 2.0;
   const double OFFSET_YAW    = 0.0;
   const std::string FILE_PATH   = ros::package::getPath("mono_vo_ros"); 
-  const std::string KITTI_FILE  = FILE_PATH + "/00.txt";  // Uses to compute scales with ground truth of KITTI dataset 
+  const std::string KITTI_FILE  = FILE_PATH + "/data/00.txt";  // Uses to compute scales with ground truth of KITTI dataset 
   const std::string RESULT_FILE = FILE_PATH + "/result.csv"; 
 
 
@@ -104,6 +104,7 @@ namespace mvo
 
       void imageCb(const sensor_msgs::ImageConstPtr& imageMsg);
 
+      void tfCb(const tf::tfMessage& tfMsg);
 
     private:
       ros::NodeHandle* nodeHandlePtr_;
@@ -111,8 +112,11 @@ namespace mvo
 
       image_transport::ImageTransport it_;
       image_transport::Subscriber imageSub_;
+      ros::Subscriber tf_sub_;
       geometry_msgs::PoseArray results_;
+      geometry_msgs::PoseArray groundtruth_;
       ros::Publisher visualOdometryPub_;
+      ros::Publisher groundTruthPub_;
 
       cv::Mat prevImage_, currImage_;
       std::vector<cv::Point2f> prevFeatures_, currFeatures_;  // Vectors to store the coordinates of the feature points

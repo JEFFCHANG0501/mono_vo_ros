@@ -29,10 +29,12 @@
 mvo::MonocularVisualOdometer::MonocularVisualOdometer(ros::NodeHandle* nodeHandlePtr, ros::NodeHandle* localNodeHandlePtr)
   : it_(*nodeHandlePtr)
 {
+  ros::NodeHandle nh;
   // Initialize Sibscriber and Publishers
   imageSub_ = it_.subscribe("kitti/camera_gray_left/image_rect", 10000, &MonocularVisualOdometer::imageCb, this);
-  //visualOdometryPub_ = nodeHandlePtr_->advertise<nav_msgs::Odometry>("mono_vo_ros/visual_odometry", 1);
+  tf_sub_ = nodeHandlePtr->subscribe("tf", 100, &MonocularVisualOdometer::tfCb, this);
   visualOdometryPub_ = localNodeHandlePtr->advertise<geometry_msgs::PoseArray>("visual_odometry", 1);
+  groundTruthPub_ = localNodeHandlePtr->advertise<geometry_msgs::PoseArray>("ground_truth", 1);
 
   // Initialize values
   isReady_ = false;
@@ -281,3 +283,34 @@ void mvo::MonocularVisualOdometer::imageCb(const sensor_msgs::ImageConstPtr& ima
   prevImage_ = currImage_.clone();
   prevFeatures_ = currFeatures_;
 }
+
+void mvo::MonocularVisualOdometer::tfCb(const tf::tfMessage& tfMsg)
+{
+  
+  tf::Quaternion quat(
+    tfMsg.transforms[0].transform.rotation.x,
+    tfMsg.transforms[0].transform.rotation.y,
+    tfMsg.transforms[0].transform.rotation.z,
+    tfMsg.transforms[0].transform.rotation.w);
+  
+  tf::Matrix3x3 m(quat);
+  double roll, pitch, yaw;
+  m.getRPY(roll, pitch, yaw);
+  geometry_msgs::Quaternion q_;
+  getQuaternionMsg(OFFSET_ROLL, pitch + OFFSET_PITCH, OFFSET_YAW, q_);
+  
+  
+  geometry_msgs::Pose pose_ground;
+  
+  pose_ground.position.x = tfMsg.transforms[0].transform.translation.x;
+  pose_ground.position.y = 0;
+  pose_ground.position.z = tfMsg.transforms[0].transform.translation.z;
+  pose_ground.orientation = q_;
+  
+  groundtruth_.poses.push_back(pose_ground);
+  groundtruth_.header.frame_id = "camera";
+
+  groundTruthPub_.publish(groundtruth_);
+
+}
+

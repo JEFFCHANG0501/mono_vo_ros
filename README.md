@@ -8,10 +8,14 @@ In order to run this algorithm, you need to have either your own data,
 or else the sequences from [KITTI's Visual Odometry Dataset](http://www.cvlibs.net/datasets/kitti/eval_odometry.php).  
 In order to run this algorithm on your own data, you must modify the intrinsic calibration parameters in the code.
 
+## How to compile
 install mono_vo_ros
 ```bash
 $ mkdir -p ros_ws/src && cd ros_ws/src
 $ git clone https://github.com/JEFFCHANG0501/mono_vo_ros.git
+$ cd ../ && catkin_make
 
 $ roslaunch mono_vo_ros mono_vo_ros.launch
 ```
+
+## Performance
